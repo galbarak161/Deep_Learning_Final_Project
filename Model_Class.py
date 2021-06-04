@@ -15,9 +15,9 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Model(nn.Module):
 
-    def __init__(self):
+    def __init__(self, model_name: str):
         super().__init__()
-
+        self.model_name = model_name
         # Hyper parameters
         self.rate = 0.001
         self.weight_decay = 0.001
@@ -120,7 +120,7 @@ class Model(nn.Module):
             # early stopping check
             if val_acc > best_validation_acc:
                 best_validation_acc = val_acc
-                torch.save(self.state_dict(), os.path.join(PATH_TO_MODEL, f'model_{self.modelId}.pth'))
+                torch.save(self.state_dict(), os.path.join(PATH_TO_MODEL, f'{self.model_name}.pth'))
                 patience_counter = 0
                 best_model_epoch_number = epoch
             else:
@@ -133,7 +133,7 @@ class Model(nn.Module):
 
         # accuracy plots
         fig = plt.figure()
-        val_acc_plot_name = f'Accuracy per epoch - Model_{self.modelId}'
+        val_acc_plot_name = f'Accuracy per epoch - {self.model_name}'
         plt.title(val_acc_plot_name)
         plt.plot(train_accuracies, label='Train Accuracy')
         plt.plot(val_accuracies, label='Validation Accuracy')
@@ -146,7 +146,7 @@ class Model(nn.Module):
         plt.clf()
 
         # loss plots
-        val_loss_plot_name = f'Loss per epoch - Model_{self.modelId}'
+        val_loss_plot_name = f'Loss per epoch - {self.model_name}'
         fig = plt.figure()
         plt.title(val_loss_plot_name)
         plt.plot(train_losses, label='Train Loss')

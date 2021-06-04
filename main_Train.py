@@ -41,7 +41,7 @@ def main():
     old_train_dataset = GTSRBDataset(transform=DEFAULT_TRANSFORM)
     test_dataset = GTSRBDataset(train=False, transform=DEFAULT_TRANSFORM)
 
-    print(f'old train set size: {len(old_train_dataset)}, new train set size: {len(train_dataset)}')
+    print(f'old train set size: {len(old_train_dataset)}, new train set size: {len(train_dataset)}\n\n')
 
     validationRatio = 0.2
 
@@ -62,10 +62,11 @@ def main():
 
     epochs = 1
 
+    print('LeNet model:\n')
     start_time = time.time()
-    model3 = LeNet()
-    summary(model3, input_size=(3, 30, 30))
-    model3.train_model(epochs, dataLoaders)
+    leNet_model = LeNet()
+    summary(leNet_model, input_size=(3, 30, 30))
+    leNet_model.train_model(epochs, dataLoaders)
     end_time = time.time()
     print_time(end_time - start_time)
 

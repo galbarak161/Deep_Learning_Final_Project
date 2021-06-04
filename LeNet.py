@@ -4,7 +4,9 @@ from Model_Class import Model
 
 class LeNet(Model):
     def __init__(self):
-        super(LeNet, self).__init__()
+        self.model_name = 'LeNet'
+        super(LeNet, self).__init__(self.model_name)
+
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=6, kernel_size=(5, 5)),
             nn.ReLU(),
