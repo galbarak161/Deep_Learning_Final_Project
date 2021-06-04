@@ -2,7 +2,7 @@ import numpy as np
 from torch.utils.data import DataLoader, SubsetRandomSampler, ConcatDataset
 import time
 
-from torchsummary import summary
+# from torchsummary import summary
 
 from GTSRBDataset import GTSRBDataset, TRAIN, TEST, VALID
 from LeNet import LeNet
@@ -65,7 +65,8 @@ def main():
     print('LeNet model:\n')
     start_time = time.time()
     leNet_model = LeNet()
-    summary(leNet_model, input_size=(3, 30, 30))
+    print(leNet_model)
+    # summary(leNet_model, input_size=(3, 30, 30))
     leNet_model.train_model(epochs, dataLoaders)
     end_time = time.time()
     print_time(end_time - start_time)
