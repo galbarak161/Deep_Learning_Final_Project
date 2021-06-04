@@ -13,85 +13,24 @@ from model.ModelMeta import PATH_TO_MODEL
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-class GTSRBModel(nn.Module):
+class Model(nn.Module):
 
-    def __init__(self, model_id, dropout=False, batch_normalization=False, fully_connected_layers=True):
+    def __init__(self):
         super().__init__()
 
         # Hyper parameters
-        rate = 0.001
-        weight_decay = 0.001
-        dropout_p = 0.2
+        self.rate = 0.001
+        self.weight_decay = 0.001
+        self.dropout_p = 0.2
 
-        self.modelId = model_id
         self.lossFunction = torch.nn.CrossEntropyLoss()
-
         self.logSoftMax = nn.LogSoftmax(dim=1)
 
-        self.feature_extractor = nn.Sequential(
-            nn.Conv2d(in_channels=3, out_channels=6, kernel_size=(5, 5)),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(in_channels=6, out_channels=16, kernel_size=(5, 5)),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-        )
+        self.optimizer = None
+        self.scheduler = None
 
-        self.classifier = nn.Sequential()
-        model_id = 0
-        if fully_connected_layers:
-            self.classifier.add_module(f'{model_id}', nn.Flatten())
-            model_id += 1
-            self.classifier.add_module(f'{model_id}', nn.Linear(16 * 4 * 4, 120))
-            model_id += 1
-            if batch_normalization:
-                self.classifier.add_module(f'{model_id}', nn.BatchNorm1d(120))
-                model_id += 1
-
-        else:
-            self.classifier.add_module(f'{model_id}', nn.Conv2d(in_channels=16, out_channels=120, kernel_size=(4, 4)))
-            model_id += 1
-            if batch_normalization:
-                self.classifier.add_module(f'{model_id}', nn.BatchNorm2d(120))
-                model_id += 1
-
-        self.classifier.add_module(f'{model_id}', nn.ReLU())
-        model_id += 1
-
-        if dropout:
-            self.classifier.add_module(f'{model_id}', nn.Dropout(dropout_p))
-            model_id += 1
-
-        if fully_connected_layers:
-            self.classifier.add_module(f'{model_id}', nn.Linear(120, 84))
-            model_id += 1
-            if batch_normalization:
-                self.classifier.add_module(f'{model_id}', nn.BatchNorm1d(84))
-                model_id += 1
-
-        else:
-            self.classifier.add_module(f'{model_id}', nn.Conv2d(in_channels=120, out_channels=84, kernel_size=(1, 1)))
-            model_id += 1
-            if batch_normalization:
-                self.classifier.add_module(f'{model_id}', nn.BatchNorm2d(84))
-                model_id += 1
-
-        self.classifier.add_module(f'{model_id}', nn.ReLU())
-        model_id += 1
-
-        if dropout:
-            self.classifier.add_module(f'{model_id}', nn.Dropout(dropout_p))
-            model_id += 1
-
-        if fully_connected_layers:
-            self.classifier.add_module(f'{model_id}', nn.Linear(84, 43))
-            model_id += 1
-
-        else:
-            self.classifier.add_module(f'{model_id}', nn.Conv2d(in_channels=84, out_channels=43, kernel_size=(1, 1)))
-            model_id += 1
-
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=rate, weight_decay=weight_decay)
+    def set_optimizer(self):
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=self.rate, weight_decay=self.weight_decay)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=3, gamma=0.8)
 
         self.to(DEVICE)

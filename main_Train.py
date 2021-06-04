@@ -5,7 +5,7 @@ import time
 from torchsummary import summary
 
 from GTSRBDataset import GTSRBDataset, TRAIN, TEST, VALID
-from GTSRBModel import GTSRBModel
+from LeNet import LeNet
 from Transforms import transformations, DEFAULT_TRANSFORM
 
 
@@ -62,28 +62,8 @@ def main():
 
     epochs = 1
 
-    # 1st model
-    print('\n------------------------1st Model------------------------')
     start_time = time.time()
-    model1 = GTSRBModel(1)
-    summary(model1, input_size=(3, 30, 30))
-    model1.train_model(epochs, dataLoaders)
-    end_time = time.time()
-    print_time(end_time - start_time)
-
-    # 2nd model
-    print('\n------------------------2nd Model-----------------------')
-    start_time = time.time()
-    model2 = GTSRBModel(2, dropout=True, batch_normalization=True)
-    summary(model2, input_size=(3, 30, 30))
-    model2.train_model(epochs, dataLoaders)
-    end_time = time.time()
-    print_time(end_time - start_time)
-
-    # 3rd model
-    print('\n------------------------3rd Model------------------------')
-    start_time = time.time()
-    model3 = GTSRBModel(3, dropout=True, batch_normalization=True, fully_connected_layers=False)
+    model3 = LeNet()
     summary(model3, input_size=(3, 30, 30))
     model3.train_model(epochs, dataLoaders)
     end_time = time.time()
