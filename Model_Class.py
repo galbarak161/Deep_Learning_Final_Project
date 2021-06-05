@@ -1,5 +1,7 @@
 import os
 import torch
+import torch.nn.functional as nn_functional
+
 from PIL import Image
 from matplotlib import pyplot as plt
 from torch import nn
@@ -15,19 +17,47 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Model(nn.Module):
 
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, use_spatial_transformer: bool):
         super().__init__()
         self.model_name = model_name
+        self.use_spatial_transformer = use_spatial_transformer
+
         # Hyper parameters
         self.rate = 0.001
         self.weight_decay = 0.001
         self.dropout_p = 0.2
 
-        self.lossFunction = torch.nn.CrossEntropyLoss()
-        self.logSoftMax = nn.LogSoftmax(dim=1)
+        self.loss_function = torch.nn.CrossEntropyLoss()
+        self.log_softMax = nn.LogSoftmax(dim=1)
 
         self.optimizer = None
         self.scheduler = None
+
+        self.localization = None
+        self.fc_loc = None
+
+        if use_spatial_transformer:
+            self.init_spatial_transformer()
+
+    def init_spatial_transformer(self):
+        self.localization = nn.Sequential(
+            nn.Conv2d(3, 8, kernel_size=(7, 7)),
+            nn.MaxPool2d(2, stride=2),
+            nn.ReLU(True),
+            nn.Conv2d(8, 10, kernel_size=(5, 5)),
+            nn.MaxPool2d(2, stride=2),
+            nn.ReLU(True)
+        )
+        # Regressor for the 3 * 2 affine matrix
+        self.fc_loc = nn.Sequential(
+            nn.Linear(10 * 4 * 4, 32),
+            nn.ReLU(True),
+            nn.Linear(32, 3 * 2)
+        )
+
+        # Initialize the weights/bias with identity transformation
+        self.fc_loc[2].weight.data.zero_()
+        self.fc_loc[2].bias.data.copy_(torch.tensor([1, 0, 0, 0, 1, 0], dtype=torch.float))
 
     def set_optimizer(self):
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.rate, weight_decay=self.weight_decay)
@@ -35,10 +65,23 @@ class Model(nn.Module):
 
         self.to(DEVICE)
 
+    # Spatial transformer network forward function
+    def stn(self, x):
+        xs = self.localization(x)
+        xs = xs.view(-1, 10 * 4 * 4)
+        theta = self.fc_loc(xs)
+        theta = theta.view(-1, 2, 3)
+        grid = nn_functional.affine_grid(theta, x.size(), align_corners=True)
+        x = nn_functional.grid_sample(x, grid, align_corners=True)
+        return x
+
     def forward(self, x):
+        if self.use_spatial_transformer:
+            x = self.stn(x)
+
         features = self.feature_extractor(x)
         class_scores = self.classifier(features)
-        probabilities = self.logSoftMax(class_scores)
+        probabilities = self.log_softMax(class_scores)
         return probabilities
 
     def get_predictions(self, path_to_image):
@@ -67,7 +110,7 @@ class Model(nn.Module):
                 # calculate output
                 predictions_probabilities = self(data).squeeze().to(DEVICE)
 
-                loss = self.lossFunction(predictions_probabilities, labels).to(DEVICE)
+                loss = self.loss_function(predictions_probabilities, labels).to(DEVICE)
                 losses.append(loss.detach())
                 # get the prediction
                 predictions = torch.argmax(predictions_probabilities, dim=1)
@@ -103,7 +146,7 @@ class Model(nn.Module):
                 predictions = self(data).to(DEVICE)
                 predictions = predictions.squeeze()
 
-                loss = self.lossFunction(predictions, labels).to(DEVICE)
+                loss = self.loss_function(predictions, labels).to(DEVICE)
                 loss.backward()
                 self.optimizer.step()
 

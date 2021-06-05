@@ -62,9 +62,8 @@ def main():
 
     epochs = 1
 
-    print('LeNet model:\n')
     start_time = time.time()
-    leNet_model = LeNet()
+    leNet_model = LeNet(use_spatial_transformer=True)
     print(leNet_model)
     # summary(leNet_model, input_size=(3, 30, 30))
     leNet_model.train_model(epochs, dataLoaders)
