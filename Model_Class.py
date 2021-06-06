@@ -13,7 +13,7 @@ from plots.PlotsMeta import PATH_TO_PLOTS
 from model.ModelMeta import PATH_TO_MODEL
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+print(f'Using {DEVICE} as device')
 
 class Model(nn.Module):
 
