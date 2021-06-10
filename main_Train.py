@@ -6,6 +6,8 @@ import time
 
 from GTSRBDataset import GTSRBDataset, TRAIN, TEST, VALID
 from LeNet import LeNet
+from Model_Class import DEVICE
+from ResNet34 import ResNet34
 from Transforms import transformations, DEFAULT_TRANSFORM
 
 
@@ -25,7 +27,7 @@ def main():
     def_dataset = GTSRBDataset(transform=DEFAULT_TRANSFORM)
     datasets = [def_dataset]
 
-    special_transforms_ratio = 0.00000005
+    special_transforms_ratio = 0.000005
 
     train_set_size = len(def_dataset)
     indices = list(range(train_set_size))
@@ -51,7 +53,7 @@ def main():
     trainSample = SubsetRandomSampler(indices[:split])
     validSample = SubsetRandomSampler(indices[split:])
 
-    batch_size = 128
+    batch_size = 256
     num_workers = 4
 
     dataLoaders = {
@@ -62,14 +64,23 @@ def main():
 
     epochs = 1
 
-    start_time = time.time()
-    leNet_model = LeNet(use_spatial_transformer=True)
+    """start_time = time.time()
+    leNet_model = LeNet(use_spatial_transformer=False)
     print(leNet_model)
     # summary(leNet_model, input_size=(3, 30, 30))
     leNet_model.train_model(epochs, dataLoaders)
+    end_time = time.time()
+    print_time(end_time - start_time)"""
+
+    start_time = time.time()
+    resnet_model = ResNet34(use_spatial_transformer=False)
+    print(resnet_model)
+    # summary(resnet_model, input_size=(3, 48, 48))
+    resnet_model.train_model(epochs, dataLoaders)
     end_time = time.time()
     print_time(end_time - start_time)
 
 
 if __name__ == '__main__':
+    print(f'Using {DEVICE} as device')
     main()
