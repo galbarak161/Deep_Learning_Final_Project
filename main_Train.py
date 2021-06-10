@@ -90,14 +90,12 @@ def main():
     vgg16_input_size = 224
     vgg16_data_loaders = init_data_and_get_loaders(vgg16_input_size)
     time_print_train_model(False, vgg16_input_size, epochs, vgg16_data_loaders, VGG16)
-
     time_print_train_model(True, vgg16_input_size, epochs, vgg16_data_loaders, VGG16)
 
     # ResNet
     resNet_input_size = 48
     resNet_data_loaders = init_data_and_get_loaders(resNet_input_size)
     time_print_train_model(False, resNet_input_size, epochs, resNet_data_loaders, ResNet34)
-
     time_print_train_model(True, resNet_input_size, epochs, resNet_data_loaders, ResNet34)
 
 

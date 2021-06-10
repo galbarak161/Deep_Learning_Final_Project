@@ -5,7 +5,7 @@ from Model_Class import Model
 class ResNet34(Model):
     def __init__(self, use_spatial_transformer: bool):
         self.model_name = 'ResNet34'
-
+        self.use_spatial_transformer = use_spatial_transformer
         super(ResNet34, self).__init__(self.model_name, use_spatial_transformer, 48)
 
         self.block_1 = nn.Sequential(
@@ -74,6 +74,9 @@ class ResNet34(Model):
         super().set_optimizer()
 
     def forward(self, x):
+        if self.use_spatial_transformer:
+            x = self.stn(x)
+
         block1_out = self.block_1(x)
 
         block2_out = self.block_2(block1_out)
