@@ -18,7 +18,7 @@ class LeNet(Model):
         )
 
         self.classifier = nn.Sequential(
-            nn.Conv2d(in_channels=16, out_channels=120, kernel_size=(4, 4)),
+            nn.Conv2d(in_channels=16, out_channels=120, kernel_size=(5, 5)),
             nn.BatchNorm2d(120),
             nn.ReLU(),
             nn.Dropout(self.dropout_p),
