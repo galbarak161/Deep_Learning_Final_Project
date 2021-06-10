@@ -15,11 +15,16 @@ from model.ModelMeta import PATH_TO_MODEL
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f'Using {DEVICE} as device')
 
+
 class Model(nn.Module):
 
     def __init__(self, model_name: str, use_spatial_transformer: bool):
         super().__init__()
+
         self.model_name = model_name
+        if use_spatial_transformer:
+            self.model_name += '_spatial_transformer'
+
         self.use_spatial_transformer = use_spatial_transformer
 
         # Hyper parameters

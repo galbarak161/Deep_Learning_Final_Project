@@ -6,9 +6,6 @@ class LeNet(Model):
     def __init__(self, use_spatial_transformer: bool):
         self.model_name = 'LeNet'
 
-        if use_spatial_transformer:
-            self.model_name += '_spatial_transformer'
-
         super(LeNet, self).__init__(self.model_name, use_spatial_transformer)
 
         self.feature_extractor = nn.Sequential(

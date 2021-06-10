@@ -25,7 +25,7 @@ def main():
     def_dataset = GTSRBDataset(transform=DEFAULT_TRANSFORM)
     datasets = [def_dataset]
 
-    special_transforms_ratio = 0.5
+    special_transforms_ratio = 0.00000005
 
     train_set_size = len(def_dataset)
     indices = list(range(train_set_size))
@@ -60,15 +60,7 @@ def main():
         TEST: DataLoader(test_dataset, batch_size=batch_size, num_workers=num_workers)
     }
 
-    epochs = 150
-
-    start_time = time.time()
-    leNet_model = LeNet(use_spatial_transformer=False)
-    print(leNet_model)
-    # summary(leNet_model, input_size=(3, 30, 30))
-    leNet_model.train_model(epochs, dataLoaders)
-    end_time = time.time()
-    print_time(end_time - start_time)
+    epochs = 1
 
     start_time = time.time()
     leNet_model = LeNet(use_spatial_transformer=True)
