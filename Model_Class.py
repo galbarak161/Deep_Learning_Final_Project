@@ -8,7 +8,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from GTSRBDataset import TRAIN, VALID, TEST
-from Transforms import DEFAULT_TRANSFORM
+from Transforms import getDefaultTransform
 from plots.PlotsMeta import PATH_TO_PLOTS
 from model.ModelMeta import PATH_TO_MODEL
 
@@ -17,7 +17,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Model(nn.Module):
 
-    def __init__(self, model_name: str, use_spatial_transformer: bool):
+    def __init__(self, model_name: str, use_spatial_transformer: bool, input_size: int):
         super().__init__()
 
         self.model_name = model_name
@@ -25,6 +25,7 @@ class Model(nn.Module):
             self.model_name += '_spatial_transformer'
 
         self.use_spatial_transformer = use_spatial_transformer
+        self.input_size = input_size
 
         # Hyper parameters
         self.rate = 0.001
@@ -90,7 +91,7 @@ class Model(nn.Module):
 
     def get_predictions(self, path_to_image):
         img = Image.open(path_to_image).convert('RGB')
-        img = DEFAULT_TRANSFORM(img)
+        img = getDefaultTransform(self.input_size)(img)
         img = img.unsqueeze(0).to(DEVICE)
 
         self.eval()
@@ -130,6 +131,7 @@ class Model(nn.Module):
         patience_counter = 0
         need_to_stop = False
         best_model_epoch_number = 0
+        model_path = os.path.join(PATH_TO_MODEL, f'{self.model_name}.pth')
 
         # results lists
         train_accuracies = []
@@ -167,7 +169,7 @@ class Model(nn.Module):
             # early stopping check
             if val_acc > best_validation_acc:
                 best_validation_acc = val_acc
-                torch.save(self.state_dict(), os.path.join(PATH_TO_MODEL, f'{self.model_name}.pth'))
+                torch.save(self.state_dict(), model_path)
                 patience_counter = 0
                 best_model_epoch_number = epoch
             else:
@@ -207,8 +209,11 @@ class Model(nn.Module):
         plt.clf()
 
         # final results
+        self.load_state_dict(torch.load(model_path))
         test_acc, test_loss = self.calculate_accuracy_and_loss(data_loaders[TEST])
-        print(f'Train: Accuracy = {(train_accuracies[-1] * 100):.2f}%, Avg Loss = {train_losses[-1]:.2f}')
-        print(f'Validation: Accuracy = {(val_accuracies[-1] * 100):.2f}%, Avg Loss = {valid_losses[-1]:.2f}')
+        print(f'Train: Accuracy = {(train_accuracies[best_model_epoch_number] * 100):.2f}%, '
+              f'Avg Loss = {train_losses[best_model_epoch_number]:.2f}')
+        print(f'Validation: Accuracy = {(val_accuracies[best_model_epoch_number] * 100):.2f}%, '
+              f'Avg Loss = {valid_losses[best_model_epoch_number]:.2f}')
         print(f'Test: Accuracy = {(test_acc * 100):.2f}%, Avg Loss = {test_loss:.2f}')
         print()

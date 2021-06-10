@@ -1,12 +1,11 @@
 from torch import nn
 from Model_Class import Model
 
-
 class LeNet(Model):
     def __init__(self, use_spatial_transformer: bool):
         self.model_name = 'LeNet'
 
-        super(LeNet, self).__init__(self.model_name, use_spatial_transformer)
+        super().__init__(self.model_name, use_spatial_transformer, 32)
 
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=6, kernel_size=(5, 5)),

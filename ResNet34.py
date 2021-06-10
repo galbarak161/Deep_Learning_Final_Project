@@ -1,13 +1,12 @@
 from torch import nn
 from Model_Class import Model
-import torch.nn.functional as nn_functional
 
 
 class ResNet34(Model):
     def __init__(self, use_spatial_transformer: bool):
         self.model_name = 'ResNet34'
 
-        super(ResNet34, self).__init__(self.model_name, use_spatial_transformer)
+        super(ResNet34, self).__init__(self.model_name, use_spatial_transformer, 48)
 
         self.block_1 = nn.Sequential(
             nn.Conv2d(3, 32, kernel_size=(3, 3), padding=(1, 1)),
