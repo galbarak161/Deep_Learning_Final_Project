@@ -2,7 +2,7 @@ import numpy as np
 from torch.utils.data import DataLoader, SubsetRandomSampler, ConcatDataset
 import time
 
-#from torchsummary import summary
+from torchsummary import summary
 
 from GTSRBDataset import GTSRBDataset, TRAIN, TEST, VALID
 from LeNet import LeNet
@@ -29,7 +29,7 @@ def init_data_and_get_loaders(imageSize):
     def_dataset = GTSRBDataset(transform=default_transform)
     datasets = [def_dataset]
 
-    special_transforms_ratio = 0.000005
+    special_transforms_ratio = 0
 
     train_set_size = len(def_dataset)
     indices = list(range(train_set_size))
@@ -69,8 +69,8 @@ def init_data_and_get_loaders(imageSize):
 def time_print_train_model(use_spatial_transformer, input_size, epochs, data_loaders, model_class):
     start_time = time.time()
     model = model_class(use_spatial_transformer=use_spatial_transformer)
-    print(model)
-    #summary(model, input_size=(3, input_size, input_size))
+    print(model_class.__name__)
+    summary(model, input_size=(3, input_size, input_size))
     model.train_model(epochs, data_loaders)
     end_time = time.time()
     print_time(end_time - start_time)
@@ -87,15 +87,17 @@ def main():
     time_print_train_model(True, leNet_input_size, epochs, leNet_data_loaders, LeNet)
 
     # VGG16
-    vgg16_input_size = 224
+    vgg16_input_size = 32
     vgg16_data_loaders = init_data_and_get_loaders(vgg16_input_size)
     time_print_train_model(False, vgg16_input_size, epochs, vgg16_data_loaders, VGG16)
+
     time_print_train_model(True, vgg16_input_size, epochs, vgg16_data_loaders, VGG16)
 
     # ResNet
     resNet_input_size = 48
     resNet_data_loaders = init_data_and_get_loaders(resNet_input_size)
     time_print_train_model(False, resNet_input_size, epochs, resNet_data_loaders, ResNet34)
+
     time_print_train_model(True, resNet_input_size, epochs, resNet_data_loaders, ResNet34)
 
 

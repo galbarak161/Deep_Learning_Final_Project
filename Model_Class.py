@@ -147,7 +147,6 @@ class Model(nn.Module):
             self.train()
             for data, labels in data_loaders[TRAIN]:
                 data, labels = data.to(DEVICE), labels.to(DEVICE)
-
                 self.optimizer.zero_grad()
                 predictions = self(data).to(DEVICE)
                 predictions = predictions.squeeze()
@@ -159,9 +158,13 @@ class Model(nn.Module):
             self.scheduler.step()
 
             # calc acc and losses
+            if epoch % 10 == 0:
+                print(f'Calculating train accuracy and loss for epoch {epoch}')
             train_acc, train_loss = self.calculate_accuracy_and_loss(data_loaders[TRAIN])
             train_accuracies.append(train_acc)
             train_losses.append(train_loss)
+            if epoch % 10 == 0:
+                print(f'Calculating validation accuracy and loss for epoch {epoch}')
             val_acc, val_loss = self.calculate_accuracy_and_loss(data_loaders[VALID])
             valid_losses.append(val_loss)
             val_accuracies.append(val_acc)
@@ -210,6 +213,7 @@ class Model(nn.Module):
 
         # final results
         self.load_state_dict(torch.load(model_path))
+        print('Calculating test accuracy')
         test_acc, test_loss = self.calculate_accuracy_and_loss(data_loaders[TEST])
         print(f'Train: Accuracy = {(train_accuracies[best_model_epoch_number] * 100):.2f}%, '
               f'Avg Loss = {train_losses[best_model_epoch_number]:.2f}')

@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 
 from Model_Class import Model
@@ -10,7 +11,7 @@ class VGG16(Model):
         if use_spatial_transformer:
             model_name += '_spatial_transformer'
 
-        super().__init__(model_name, use_spatial_transformer, 128)
+        super().__init__(model_name, use_spatial_transformer, 32)
 
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=64, kernel_size=(3, 3), padding=(1, 1)),
@@ -64,8 +65,10 @@ class VGG16(Model):
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
 
+        self.avg_pool = nn.AdaptiveAvgPool2d((7, 7))
+
         self.classifier = nn.Sequential(
-            nn.Flatten(),
+            # nn.Flatten(),
             nn.Linear(512 * 7 * 7, 4096),
             nn.ReLU(inplace=True),
             nn.Dropout(),
@@ -76,3 +79,10 @@ class VGG16(Model):
         )
 
         super().set_optimizer()
+
+    def forward(self, x):
+        x = self.feature_extractor(x)
+        x = self.avg_pool(x)
+        x = torch.flatten(x, 1)
+        x = self.classifier(x)
+        return x
