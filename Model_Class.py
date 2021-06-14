@@ -17,15 +17,19 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Model(nn.Module):
 
-    def __init__(self, model_name: str, use_spatial_transformer: bool, input_size: int):
+    def __init__(self, model_name: str, use_spatial_transformer: bool, input_size=32):
         super().__init__()
 
         self.model_name = model_name
-        if use_spatial_transformer:
-            self.model_name += '_spatial_transformer'
-
         self.use_spatial_transformer = use_spatial_transformer
         self.input_size = input_size
+
+        if use_spatial_transformer:
+            self.model_name += '_spatial_transformer'
+            self.init_spatial_transformer()
+        else:
+            self.localization = None
+            self.fc_loc = None
 
         # Hyper parameters
         self.rate = 0.001
@@ -37,12 +41,6 @@ class Model(nn.Module):
 
         self.optimizer = None
         self.scheduler = None
-
-        self.localization = None
-        self.fc_loc = None
-
-        if use_spatial_transformer:
-            self.init_spatial_transformer()
 
     def init_spatial_transformer(self):
         self.localization = nn.Sequential(
@@ -80,12 +78,15 @@ class Model(nn.Module):
         x = nn_functional.grid_sample(x, grid, align_corners=True)
         return x
 
+    # forward function to override
+    def model_forward(self, x):
+        pass
+
     def forward(self, x):
         if self.use_spatial_transformer:
             x = self.stn(x)
 
-        features = self.feature_extractor(x)
-        class_scores = self.classifier(features)
+        class_scores = self.model_forward(x)
         probabilities = self.log_softMax(class_scores)
         return probabilities
 

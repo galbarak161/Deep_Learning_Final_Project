@@ -64,7 +64,7 @@ class ResNet34(Model):
         )
 
         self.classifier = nn.Sequential(
-            nn.Linear(256 * 6 * 6, 2048),
+            nn.Linear(256 * 4 * 4, 2048),
             nn.BatchNorm1d(2048),
             nn.ReLU(),
             nn.Dropout(self.dropout_p),
@@ -73,10 +73,7 @@ class ResNet34(Model):
 
         super().set_optimizer()
 
-    def forward(self, x):
-        if self.use_spatial_transformer:
-            x = self.stn(x)
-
+    def model_forward(self, x):
         block1_out = self.block_1(x)
 
         block2_out = self.block_2(block1_out)
@@ -85,8 +82,5 @@ class ResNet34(Model):
 
         block4_out = self.block_4(block3_out)
 
-        block4_reshaped = block4_out.view(-1, 256 * 6 * 6)
-        class_scores = self.classifier(block4_reshaped)
-        probabilities = self.log_softMax(class_scores)
-
-        return probabilities
+        class_scores = self.classifier(block4_out.view(-1, 256 * 4 * 4))
+        return class_scores
