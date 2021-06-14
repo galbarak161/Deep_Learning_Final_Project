@@ -2,7 +2,7 @@ import numpy as np
 from torch.utils.data import DataLoader, SubsetRandomSampler, ConcatDataset
 import time
 
-from torchsummary import summary
+# from torchsummary import summary
 
 from GTSRBDataset import GTSRBDataset, TRAIN, TEST, VALID
 from LeNet import LeNet
@@ -30,7 +30,7 @@ def init_data_and_get_loaders(image_size):
     def_dataset = GTSRBDataset(transform=default_transform)
     datasets = [def_dataset]
 
-    special_transforms_ratio = 0
+    special_transforms_ratio = 0.5
 
     train_set_size = len(def_dataset)
     indices = list(range(train_set_size))
@@ -72,8 +72,8 @@ def time_print_train_model(use_spatial_transformer, input_size, epochs, data_loa
     start_time = time.time()
     model = model_class(use_spatial_transformer=use_spatial_transformer)
     print(model)
-    print(model_class.__name__)
-    summary(model, input_size=(3, input_size, input_size))
+    """print(model_class.__name__)
+    summary(model, input_size=(3, input_size, input_size))"""
     model.train_model(epochs, data_loaders)
     end_time = time.time()
     print_time(end_time - start_time)
