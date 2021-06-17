@@ -6,7 +6,6 @@ Final project in Deep Learning course. The University of Haifa.
 ADD DESCRIPTION
 
 ---
-
 ## Load The Data
 we used the original Kaggle dataset from [here](https://www.kaggle.com/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign).
 
