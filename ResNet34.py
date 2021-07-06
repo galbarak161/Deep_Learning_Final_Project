@@ -3,8 +3,8 @@ from Model_Class import Model
 
 
 class ResNet34(Model):
-    def __init__(self, use_spatial_transformer: bool):
-        self.model_name = 'ResNet34'
+    def __init__(self, use_spatial_transformer: bool, dataset_name: str, num_of_classes: int):
+        self.model_name = 'ResNet34' + '_' + dataset_name
         self.use_spatial_transformer = use_spatial_transformer
         super(ResNet34, self).__init__(self.model_name, use_spatial_transformer, 48)
 
@@ -68,7 +68,7 @@ class ResNet34(Model):
             nn.BatchNorm1d(2048),
             nn.ReLU(),
             nn.Dropout(self.dropout_p),
-            nn.Linear(2048, 43)
+            nn.Linear(2048, num_of_classes)
         )
 
         super().set_optimizer()

@@ -6,8 +6,8 @@ from Model_Class import Model
 
 class VGG16(Model):
 
-    def __init__(self, use_spatial_transformer: bool):
-        model_name = 'VGG16'
+    def __init__(self, use_spatial_transformer: bool, dataset_name: str, num_of_classes: int):
+        model_name = 'VGG16' + '_' + dataset_name
         super().__init__(model_name, use_spatial_transformer)
 
         self.feature_extractor = nn.Sequential(
@@ -71,7 +71,7 @@ class VGG16(Model):
             nn.Linear(4096, 4096),
             nn.ReLU(inplace=True),
             nn.Dropout(),
-            nn.Linear(4096, 43),
+            nn.Linear(4096, num_of_classes),
         )
 
         super().set_optimizer()
