@@ -1,8 +1,7 @@
 import numpy as np
 from torch.utils.data import DataLoader, SubsetRandomSampler, ConcatDataset
 import time
-from torchvision import datasets
-from torchvision.transforms import transforms
+
 # from torchsummary import summary
 
 from GTSRBDataset import GTSRBDataset, TRAIN, TEST, VALID
@@ -29,7 +28,7 @@ def init_data_and_get_loaders(image_size):
     # dataset initialization
     default_transform = getDefaultTransform(image_size)
     def_dataset = GTSRBDataset(transform=default_transform)
-    datasets_list = [def_dataset]
+    datasets = [def_dataset]
 
     special_transforms_ratio = 0.5
 
@@ -41,58 +40,37 @@ def init_data_and_get_loaders(image_size):
         transform_sample = indices[:split]
 
         special_dataset = GTSRBDataset(transform_sample, transform=data_transform)
-        datasets_list.append(special_dataset)
+        datasets.append(special_dataset)
 
-    train_dataset = ConcatDataset(datasets_list)
+    train_dataset = ConcatDataset(datasets)
     old_train_dataset = GTSRBDataset(transform=default_transform)
     test_dataset = GTSRBDataset(train=False, transform=default_transform)
 
     print(f'old train set size: {len(old_train_dataset)}, new train set size: {len(train_dataset)}\n\n')
 
-    return split_data_and_get_loaders(train_dataset, test_dataset)
+    validationRatio = 0.2
 
-
-def init_cifar10_data_and_get_loaders(image_size):
-    data_mean = (125.30691805, 122.95039414, 113.86538318)
-    data_std = (62.99321928, 62.08870764, 66.70489964)
-    transform = transforms.Compose([
-        transforms.Resize((image_size, image_size)),
-        transforms.ToTensor(),
-        transforms.Normalize(data_mean, data_std)
-    ])
-
-    train_set = datasets.CIFAR10('./cifar10_data', train=True, download=True, transform=transform)
-    test_set = datasets.CIFAR10('./cifar10_data', download=True, train=False, transform=transform)
-
-    return split_data_and_get_loaders(train_set, test_set)
-
-
-def split_data_and_get_loaders(train_set, test_set, ):
-    validation_rate = 0.2
-
-    indices = list(range(len(train_set)))
+    indices = list(range(len(train_dataset)))
     np.random.shuffle(indices)
-    split = int(np.floor(validation_rate * len(train_set)))
-    train_sample = SubsetRandomSampler(indices[:split])
-    valid_sample = SubsetRandomSampler(indices[split:])
+    split = int(np.floor(validationRatio * len(train_dataset)))
+    trainSample = SubsetRandomSampler(indices[:split])
+    validSample = SubsetRandomSampler(indices[split:])
 
     batch_size = 256
     num_workers = 4
 
     dataLoaders = {
-        TRAIN: DataLoader(train_set, sampler=train_sample, batch_size=batch_size, num_workers=num_workers),
-        VALID: DataLoader(train_set, sampler=valid_sample, batch_size=batch_size, num_workers=num_workers),
-        TEST: DataLoader(test_set, batch_size=batch_size, num_workers=num_workers)
+        TRAIN: DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers, sampler=trainSample),
+        VALID: DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers, sampler=validSample),
+        TEST: DataLoader(test_dataset, batch_size=batch_size, num_workers=num_workers)
     }
 
     return dataLoaders
 
 
-def time_print_train_model(use_spatial_transformer, input_size, epochs, data_loaders, model_class,
-                           dataset_name, num_of_classes):
+def time_print_train_model(use_spatial_transformer, input_size, epochs, data_loaders, model_class):
     start_time = time.time()
-    model = model_class(use_spatial_transformer=use_spatial_transformer, dataset_name=dataset_name,
-                        num_of_classes=num_of_classes)
+    model = model_class(use_spatial_transformer=use_spatial_transformer)
     print(model)
     """print(model_class.__name__)
     summary(model, input_size=(3, input_size, input_size))"""
@@ -102,39 +80,21 @@ def time_print_train_model(use_spatial_transformer, input_size, epochs, data_loa
 
 
 def main():
-    epochs = 2
+    epochs = 1
     image_size = 32
-    GTSRB_name = 'GTSRB'
-    GTSRB_num_of_classes = 43
     data = init_data_and_get_loaders(image_size)
 
     # LeNet
-    time_print_train_model(False, image_size, epochs, data, LeNet, GTSRB_name, GTSRB_num_of_classes)
-    time_print_train_model(True, image_size, epochs, data, LeNet, GTSRB_name, GTSRB_num_of_classes)
+    time_print_train_model(False, image_size, epochs, data, LeNet)
+    time_print_train_model(True, image_size, epochs, data, LeNet)
 
     # VGG16
-    time_print_train_model(False, image_size, epochs, data, VGG16, GTSRB_name, GTSRB_num_of_classes)
-    time_print_train_model(True, image_size, epochs, data, VGG16, GTSRB_name, GTSRB_num_of_classes)
+    time_print_train_model(False, image_size, epochs, data, VGG16)
+    time_print_train_model(True, image_size, epochs, data, VGG16)
 
     # ResNet
-    time_print_train_model(False, image_size, epochs, data, ResNet34, GTSRB_name, GTSRB_num_of_classes)
-    time_print_train_model(True, image_size, epochs, data, ResNet34, GTSRB_name, GTSRB_num_of_classes)
-
-    cifar10_name = 'cifar10'
-    cifar10_num_of_classes = 10
-    cifar10_data = init_cifar10_data_and_get_loaders(image_size)
-
-    # LeNet
-    time_print_train_model(False, image_size, epochs, cifar10_data, LeNet, cifar10_name, cifar10_num_of_classes)
-    time_print_train_model(True, image_size, epochs, cifar10_data, LeNet, cifar10_name, cifar10_num_of_classes)
-
-    # VGG16
-    time_print_train_model(False, image_size, epochs, cifar10_data, VGG16, cifar10_name, cifar10_num_of_classes)
-    time_print_train_model(True, image_size, epochs, cifar10_data, VGG16, cifar10_name, cifar10_num_of_classes)
-
-    # # ResNet
-    time_print_train_model(False, image_size, epochs, cifar10_data, ResNet34, cifar10_name, cifar10_num_of_classes)
-    time_print_train_model(True, image_size, epochs, cifar10_data, ResNet34, cifar10_name, cifar10_num_of_classes)
+    time_print_train_model(False, image_size, epochs, data, ResNet34)
+    time_print_train_model(True, image_size, epochs, data, ResNet34)
 
 
 if __name__ == '__main__':
