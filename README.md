@@ -3,38 +3,22 @@ Final project in Deep Learning course. The University of Haifa.
 
 
 ---
-ADD DESCRIPTION
+Our main goal was to compare different classifying networks on the same input 
+in order to find the network that provides the best results by taking into account the net's complexity (number of parameters) and training time.
 
 ---
 ## Load The Data
-we used two datasets for our project:
+we used the original Kaggle dataset from [here](https://www.kaggle.com/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign).
 
-### Kaggle
-The original Kaggle dataset from [here](https://www.kaggle.com/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign).
-
-This dataset contains almost 40,000 images of different traffic signs. It is further classified into 43 different classes. 
-
-
-### CIFAR-10
-The CIFAR-10 from [here](https://www.cs.toronto.edu/~kriz/cifar.html).
-
-The CIFAR-10 dataset consists of 60,000 images in 10 classes, with 6000 images per class.
-```
-    Train set size: 50,000 
-    Test set size: 10,000
-```
-
-### Augmentations
-On the Kaggle dataset we used several techniques of dataset augmentations to create more training and validation data.
+The dataset contains almost 40,000 images of different traffic signs. It is further classified into 43 different classes. 
+Then we used several techniques of dataset augmentations to create more training and validation data.
 
 ```
-    Kaggle: 
-    Orignal data size: 39,209
-    New data size: 274,457
-    Test set size: 12,630
+    old data size: 39209, new data size: 274457
 ```
 
-## Networks Visualization
+## Networks Visualization   
+
 ```
 --------------------------- LeNet 5 ----------------------------
 ----------------------------------------------------------------
@@ -179,7 +163,7 @@ Total params: 10,441,835
 ----------------------------------------------------------------
 ```
 
-## Training Results - Kaggle
+## Training Results
 ```
 --------------------------- LeNet 5 ----------------------------
 Train: Accuracy = 97.54%, Avg Loss = 0.10
@@ -203,17 +187,6 @@ Test: Accuracy = 98.83%, Avg Loss = 0.05
 	Time taken: 01:36:23.83
 ```
 
-## Training Results - CIFAR-10
-```
---------------------------- LeNet 5 ----------------------------
-
-
---------------------------- VGG 16 -----------------------------
-
-
-------------------------- ResNet 34 ----------------------------
-
-```
 ## Spatial Transformer
 ```
   (localization): Sequential(
@@ -245,7 +218,7 @@ Test: Accuracy = 98.83%, Avg Loss = 0.05
 ================================================================
 ```
 
-## Training Results with Spatial Transformer - Kaggle
+## Training Results with Spatial Transformer
 ```
 --------------------------- LeNet 5 ----------------------------
 Train: Accuracy = 98.86%, Avg Loss = 0.05
@@ -267,16 +240,4 @@ Validation: Accuracy = 98.88%, Avg Loss = 0.05
 Test: Accuracy = 98.82%, Avg Loss = 0.05
 
 	Time taken: 01:50:42.37
-```
-
-## Training Results with Spatial Transformer - CIFAR-10
-```
---------------------------- LeNet 5 ----------------------------
-
-
---------------------------- VGG 16 -----------------------------
-
-
-------------------------- ResNet 34 ----------------------------
-
 ```
